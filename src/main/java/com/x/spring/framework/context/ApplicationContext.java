@@ -1,4 +1,6 @@
-package com.x.spring.framework.core.factory;
+package com.x.spring.framework.context;
+
+import com.x.spring.framework.core.factory.BeanFactory;
 
 /**
  * @author yifanl
