@@ -1,11 +1,16 @@
 package com.x.spring.framework.context.support;
 
 import com.x.spring.framework.annotation.Autowired;
+import com.x.spring.framework.aop.AopProxy;
+import com.x.spring.framework.aop.CglibAopProxy;
+import com.x.spring.framework.aop.JdkDynamicAopProxy;
+import com.x.spring.framework.aop.config.AopConfig;
+import com.x.spring.framework.aop.support.AdvisedSupport;
 import com.x.spring.framework.beans.BeanWrapper;
 import com.x.spring.framework.beans.config.BeanDefinition;
 import com.x.spring.framework.beans.support.BeanDefinitionReader;
+import com.x.spring.framework.context.ApplicationContext;
 import com.x.spring.framework.core.factory.BeanFactory;
-import jdk.internal.dynalink.linker.LinkerServices;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -22,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 4. 将BeanDefinition集合注册到容器中（Map<String, BeanDefinition>）
  *
  */
-public class DefaultApplicationContext implements BeanFactory {
+public class DefaultApplicationContext implements ApplicationContext {
     /**
      * 配置文件路径
      */
@@ -120,10 +125,37 @@ public class DefaultApplicationContext implements BeanFactory {
         try {
             Class<?> clazz = Class.forName(className);
             instance = clazz.newInstance();
+            AdvisedSupport config = getAopConfig();
+            config.setTarget(instance);
+            config.setTargetClass(clazz);
+            if(config.pointCutMatch()){
+                instance = createProxy(config).getProxy();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return instance;
+    }
+
+    private AopProxy createProxy(AdvisedSupport config) {
+        Class targetClass = config.getTargetClass();
+        //如果接口数量 > 0则使用JDK原生动态代理
+        if(targetClass.getInterfaces().length > 0){
+            return new JdkDynamicAopProxy(config);
+        }
+        return new CglibAopProxy();
+    }
+
+    private AdvisedSupport getAopConfig() {
+        AopConfig config = new AopConfig();
+        config.setPointCut(this.reader.getConfig().getProperty("pointCut"));
+        config.setAspectClass(this.reader.getConfig().getProperty("aspectClass"));
+        config.setAspectBefore(this.reader.getConfig().getProperty("aspectBefore"));
+        config.setAspectAfter(this.reader.getConfig().getProperty("aspectAfter"));
+        config.setAspectAfterThrow(this.reader.getConfig().getProperty("aspectAfterThrow"));
+        config.setAspectAfterThrowingName(this.reader.getConfig().getProperty("aspectAfterThrowingName"));
+        return new AdvisedSupport(config);
+
     }
 
     private void populateBean(String beanName, BeanDefinition beanDefinition, BeanWrapper beanWrapper) {
