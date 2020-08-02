@@ -31,6 +31,21 @@
       <version>1.18.8</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <!--容器已经提供了，只用在编译测试阶段-->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+      <version>1.2.70</version>
+    </dependency>
+
   </dependencies>
 
   <build>

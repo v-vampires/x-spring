@@ -13,6 +13,7 @@ import com.x.spring.framework.context.ApplicationContext;
 import com.x.spring.framework.core.factory.BeanFactory;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -195,5 +196,9 @@ public class DefaultApplicationContext implements ApplicationContext {
     @Override
     public <T> T getBean(Class<T> requiredType) throws Exception {
         return (T) getBean(requiredType.getName());
+    }
+
+    public String[] getBeanDefinitionNames() {
+        return beanDefinitionMap.keySet().toArray(new String[beanDefinitionMap.size()]);
     }
 }
